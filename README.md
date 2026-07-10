@@ -1,8 +1,7 @@
 # 사장님 파트너 (BizPartner) — 소상공인 금융 지원 에이전트
 
 소상공인의 자연어 질문을 이해해 **상권 진단 · 정책자금 매칭 · 금융상품 추천 · 변화 알림**을
-하나의 대화에서 제공하는 데모 웹앱입니다. (KB AI Challenge 「현직자 Pick」 주제 3번)
-
+하나의 대화에서 제공하는 데모 웹앱입니다.
 ## 데모
 GitHub Pages: `https://<username>.github.io/sme-finance-app/`
 
