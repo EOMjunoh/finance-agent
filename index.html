@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+<title>사장님 파트너 — 소상공인 금융 지원 에이전트</title>
+<link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@600;800&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sign:#1E5B4F;        /* 간판 초록 */
+  --sign-deep:#153F37;
+  --paper:#FAFAF7;       /* 백지 */
+  --ink:#22271F;
+  --ink-soft:#6B7166;
+  --line:#E3E4DC;
+  --amber:#B07B10;       /* 조건부·알림 */
+  --amber-bg:#FBF3E1;
+  --pen:#2B5BB7;         /* 볼펜 파랑 — 사용자 말풍선 */
+  --stamp-ok:#1E5B4F;
+  --card:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+summary::-webkit-details-marker{display:none}
+button,.m-card{touch-action:manipulation}
+html,body{height:100%}
+body{background:#EDEEE8;font-family:"IBM Plex Sans KR",sans-serif;color:var(--ink);
+     display:flex;justify-content:center}
+.shell{width:100%;max-width:480px;height:100vh;height:100dvh;display:flex;flex-direction:column;
+       background:var(--paper);box-shadow:0 0 40px rgba(30,40,30,.12)}
+/* ── 헤더: 간판 ── */
+header{background:var(--sign);color:#F3F6EF;padding:14px 18px 12px;flex:none}
+.brand-eyebrow{font-size:.68rem;letter-spacing:.22em;opacity:.75;font-weight:500}
+.brand{font-family:"Hahmlet",serif;font-weight:800;font-size:1.25rem;letter-spacing:.01em}
+.brand small{font-family:"IBM Plex Sans KR";font-weight:400;font-size:.78rem;opacity:.8;margin-left:8px}
+.mode-line{font-size:.68rem;opacity:.7;margin-top:2px}
+/* ── 온보딩 ── */
+.onboard{flex:1;overflow-y:auto;padding:26px 20px}
+.onboard h2{font-family:"Hahmlet",serif;font-size:1.3rem;font-weight:800;margin-bottom:4px}
+.onboard p.lead{color:var(--ink-soft);font-size:.9rem;margin-bottom:20px}
+.m-card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+        padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
+.m-card:hover,.m-card:focus-visible{border-color:var(--sign)}
+.m-card b{font-size:.98rem}
+.m-card .sub{color:var(--ink-soft);font-size:.8rem;margin-top:2px}
+.divider{display:flex;align-items:center;gap:10px;color:var(--ink-soft);
+         font-size:.75rem;margin:18px 0 12px}
+.divider::before,.divider::after{content:"";flex:1;border-top:1px dashed var(--line)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-grid .full{grid-column:1/-1}
+label{font-size:.72rem;color:var(--ink-soft);display:block;margin-bottom:3px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;
+             font-family:inherit;font-size:16px;background:#fff;color:var(--ink)}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--sign);outline-offset:1px}
+.btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--sign);
+     color:#fff;font-family:inherit;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:14px}
+.btn:hover{background:var(--sign-deep)}
+/* ── 알림 ── */
+.alerts{flex:none;padding:10px 14px 4px;display:flex;flex-direction:column;gap:6px}
+.alert-chip{background:var(--amber-bg);border:1px solid #EAD9AE;border-radius:9px;
+            padding:7px 11px;font-size:.78rem;color:#6B5511;line-height:1.45}
+/* ── 채팅 ── */
+.chat{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;display:flex;flex-direction:column;gap:14px}
+.msg{max-width:88%;line-height:1.6;font-size:.9rem;white-space:pre-wrap}
+.msg.user{align-self:flex-end;background:var(--pen);color:#fff;
+          border-radius:14px 14px 3px 14px;padding:10px 14px}
+.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);
+         border-radius:14px 14px 14px 3px;padding:12px 14px}
+.msg .disclaimer{display:block;margin-top:8px;font-size:.68rem;color:var(--ink-soft)}
+/* ── 상세 카드: 영수증 감성 ── */
+details{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+summary{cursor:pointer;font-size:.78rem;font-weight:700;color:var(--sign);list-style:none}
+summary::before{content:"▸ "}
+details[open] summary::before{content:"▾ "}
+.v-card{position:relative;border:1px solid var(--line);border-radius:10px;
+        padding:10px 12px;margin:8px 0;background:#FDFDFB}
+.v-card .t{font-weight:700;font-size:.85rem;padding-right:56px}
+.v-card .meta{font-size:.72rem;color:var(--ink-soft);margin-top:2px}
+.reason{font-size:.78rem;margin-top:5px}
+.reason.ok::before{content:"✓ ";color:var(--sign)}
+.reason.chk::before{content:"? ";color:var(--amber);font-weight:700}
+.evidence{border-left:3px solid var(--sign);background:#F2F5F1;padding:5px 10px;
+          margin:4px 0 4px 12px;font-size:.74rem;color:#3E4A42}
+.evidence::before{content:"공고 원문 · ";font-weight:700;color:var(--sign)}
+/* 시그니처: 판정 도장 */
+.stamp{position:absolute;top:8px;right:10px;transform:rotate(-8deg);
+       border:2.5px solid var(--stamp-ok);color:var(--stamp-ok);border-radius:6px;
+       font-family:"Hahmlet",serif;font-weight:800;font-size:.82rem;
+       padding:2px 8px;letter-spacing:.15em;opacity:.9;
+       animation:stampIn .25s cubic-bezier(.2,1.6,.4,1) both}
+.stamp.cond{border-color:var(--amber);color:var(--amber)}
+@keyframes stampIn{from{transform:rotate(-8deg) scale(1.6);opacity:0}
+                   to{transform:rotate(-8deg) scale(1);opacity:.9}}
+@media (prefers-reduced-motion:reduce){.stamp{animation:none}}
+.metric-row{display:flex;gap:8px;margin:8px 0}
+.metric{flex:1;background:#FDFDFB;border:1px solid var(--line);border-radius:9px;
+        padding:8px;text-align:center}
+.metric .n{font-family:"IBM Plex Mono",monospace;font-size:1.02rem;font-weight:500}
+.metric .l{font-size:.66rem;color:var(--ink-soft)}
+.src-note{font-size:.68rem;color:var(--ink-soft);margin-top:4px}
+.p-row{border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin:8px 0;background:#FDFDFB}
+.p-row .t{font-weight:700;font-size:.85rem}
+.p-row .meta{font-size:.74rem;color:var(--ink-soft);margin-top:2px}
+.p-row .why{font-size:.74rem;color:#3E4A42;margin-top:4px}
+/* ── 입력부 ── */
+.composer{flex:none;border-top:1px solid var(--line);background:#fff;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+.quick{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px}
+.quick button{flex:none;border:1px solid var(--line);background:var(--paper);color:var(--ink);
+              border-radius:16px;padding:6px 12px;font-family:inherit;font-size:.78rem;cursor:pointer}
+.quick button:hover{border-color:var(--sign);color:var(--sign)}
+.input-row{display:flex;gap:8px}
+.input-row input{flex:1;border-radius:20px;padding:11px 16px}
+.input-row button{flex:none;width:46px;border:none;border-radius:50%;background:var(--sign);
+                  color:#fff;font-size:1.05rem;cursor:pointer}
+.typing{color:var(--ink-soft);font-size:.8rem;align-self:flex-start;padding:6px 4px}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand-eyebrow">BIZPARTNER · 소상공인 금융 지원 에이전트</div>
+    <div class="brand">사장님 파트너 <small id="hdrName"></small></div>
+    <div class="mode-line" id="modeLine">판정: 룰 엔진 · 문장: Claude(실패 시 템플릿) · 상권지표: 시연용 가정치</div>
+  </header>
+
+  <!-- 온보딩 -->
+  <section class="onboard" id="onboard">
+    <h2>사장님, 어떤 가게를 운영하세요?</h2>
+    <p class="lead">프로필을 알려주시면 상권·정책자금·대출을 맞춤으로 챙겨드려요.</p>
+    <div id="merchantList"></div>
+    <div class="divider">또는 직접 입력</div>
+    <div class="form-grid">
+      <div class="full"><label>상호명</label><input id="fName" placeholder="예: 연남살롱 카페"></div>
+      <div><label>대표자명</label><input id="fOwner" placeholder="예: 김하늘"></div>
+      <div><label>업종군</label><select id="fSector"><option>음식</option><option>소매</option><option>제조</option><option>서비스</option></select></div>
+      <div class="full"><label>사업장 지역</label><select id="fRegion"></select></div>
+      <div><label>개업일</label><input id="fFounded" type="date" value="2024-01-01"></div>
+      <div><label>상시근로자 수</label><input id="fEmp" type="number" value="2" min="0"></div>
+      <div><label>연 매출(만원)</label><input id="fRev" type="number" value="18000" min="0"></div>
+      <div><label>자금 목적</label><select id="fPurpose"><option>운전자금</option><option>시설자금</option></select></div>
+    </div>
+    <button class="btn" onclick="startCustom()">시작하기</button>
+  </section>
+
+  <!-- 메인 -->
+  <div class="alerts hidden" id="alerts"></div>
+  <main class="chat hidden" id="chat" aria-live="polite"></main>
+  <div class="composer hidden" id="composer">
+    <div class="quick" id="quick"></div>
+    <form class="input-row" onsubmit="onSend(event)">
+      <input id="query" placeholder="무엇이든 물어보세요 (상권·정책자금·대출)" autocomplete="off">
+      <button type="submit" aria-label="보내기">➤</button>
+    </form>
+  </div>
+</div>
+
+<script>
+/* ══════════ 데이터 (파이썬 MVP에서 이식) ══════════ */
+const KSIC_MAP={"음식":["I56111","일반 음식점업"],"소매":["G47190","종합 소매업"],
+                "제조":["C10712","식료품 제조업"],"서비스":["S96112","생활 서비스업"]};
+const MERCHANTS=[
+ {name:"연남살롱 카페",owner:"김하늘",ksic:"I56220",ksic_name:"비알코올 음료점업",sector:"음식",
+  founded:"2024-11-01",region:"서울특별시 마포구",dong:"연남동",employees:2,revenue_krw:180000000,certs:[],purpose:"운전자금"},
+ {name:"분당수제버거",owner:"박준영",ksic:"I56111",ksic_name:"한식 일반 음식점업",sector:"음식",
+  founded:"2021-03-15",region:"경기도 성남시 분당구",dong:"정자동",employees:4,revenue_krw:420000000,certs:[],purpose:"시설자금"},
+ {name:"부천헬로문구",owner:"이서연",ksic:"G47612",ksic_name:"문구용품 소매업",sector:"소매",
+  founded:"2017-06-20",region:"경기도 부천시",dong:"중동",employees:1,revenue_krw:210000000,certs:[],purpose:"운전자금"},
+ {name:"수원공방베이커리",owner:"최민재",ksic:"C10712",ksic_name:"빵류 제조업",sector:"제조",
+  founded:"2023-02-01",region:"경기도 수원시",dong:"행궁동",employees:4,revenue_krw:350000000,certs:[],purpose:"시설자금"}];
+
+const ANNS=[
+ {id:"A2026-001",title:"2026년 청년창업 지원사업 (창업사관학교형)",agency:"중소벤처기업진흥공단",
+  deadline:"2026-07-24",support:"최대 1억원 (총 사업비의 70% 이내)",
+  req:{max_years:3,human:["대표자 연령 만 39세 이하","채무불이행·세금체납 여부"],conf:0.93,
+       ev:{max_years:"공고일 기준 업력 3년 이내(창업 후 3년이 경과하지 아니한 자)의 창업기업"}}},
+ {id:"A2026-002",title:"2026년 스마트공장 보급·확산 지원사업 (기초)",agency:"중소벤처기업부",
+  deadline:"2026-08-14",support:"최대 7천만원 (총 사업비의 50%)",
+  req:{allowed_ksic:["C"],min_employees:5,human:["동일 단계 기지원 이력"],conf:0.95,
+       ev:{allowed_ksic:"한국표준산업분류상 제조업 C 영위",min_employees:"상시근로자 5인 이상 기업"}}},
+ {id:"A2026-004",title:"2026년 경기도 중소기업 육성자금 (운전자금)",agency:"경기도/경기신용보증재단",
+  deadline:"2026-12-31",support:"최대 5억원 융자 (이차보전 2%p)",
+  req:{min_years:1,regions:["경기"],human:["세금 체납 여부"],conf:0.96,
+       ev:{regions:"경기도 내에 사업장(본점 또는 주사업장)을 둔",min_years:"업력 1년 이상 중소기업"}}},
+ {id:"A2026-005",title:"2026년 벤처기업 특례보증 (기술보증기금)",agency:"기술보증기금",
+  deadline:"2026-12-31",support:"최대 10억원 보증 (보증비율 95%)",
+  req:{max_years:7,required_certs:["벤처기업확인"],human:["보증사고 이력"],conf:0.97,
+       ev:{required_certs:"벤처기업확인서를 보유한",max_years:"업력 7년 미만의 중소기업"}}},
+ {id:"A2026-006",title:"2026년 스마트상점 기술보급사업",agency:"소상공인시장진흥공단",
+  deadline:"2026-07-18",support:"최대 500만원 (자부담 30%)",
+  req:{allowed_ksic:["G","I","S"],max_employees:5,human:["오프라인 점포 운영 여부"],conf:0.90,
+       ev:{max_employees:"상시근로자 5인 미만(제조업 등은 10인 미만)의 소상공인",
+           allowed_ksic:"도·소매업, 음식·숙박업, 서비스업 영위 사업자"}}}];
+
+const PRODUCTS=[
+ {id:"P01",name:"소상공인 든든 신용대출",purpose:["운전자금"],max:0.5,rate:"기준금리+1.8~3.5%p",
+  req:{min_years:1,max_employees:10},desc:"무보증 신용대출. 국세·지방세 완납 심사."},
+ {id:"P02",name:"지역신보 보증부 운전자금대출",purpose:["운전자금"],max:1.0,rate:"기준금리+1.2~2.4%p",
+  req:{min_years:0.5},pair:true,desc:"지역신용보증재단 보증서 담보. 정책 이차보전 결합 가능."},
+ {id:"P03",name:"사업장 시설자금대출",purpose:["시설자금"],max:3.0,rate:"기준금리+1.5~2.8%p",
+  req:{min_years:1},desc:"설비·인테리어·확장 자금. 시설 견적서 필요."},
+ {id:"P04",name:"정책자금 연계 이차보전대출",purpose:["운전자금","시설자금"],max:5.0,
+  rate:"정책 이차보전 적용 시 실부담 금리 절감",req:{},pair:true,
+  desc:"정책자금 융자 추천서 보유 고객 대상 협약 대출."},
+ {id:"P05",name:"카드매출 연계대출",purpose:["운전자금"],max:0.3,rate:"기준금리+2.0~4.0%p",
+  req:{sectors:["음식","소매"],min_years:0.5},desc:"월 카드매출 기반 한도, 일 단위 자동 상환."},
+ {id:"P06",name:"창업 첫걸음 특례보증대출",purpose:["운전자금","시설자금"],max:0.7,
+  rate:"기준금리+1.0~2.0%p (특례보증)",req:{max_years:3},pair:true,desc:"업력 3년 미만 창업 특례보증 연계."}];
+
+const SNAP={기준일:"2026-07-01",기준금리:2.50,이전기준금리:2.75,지역:{
+ "서울특별시 마포구":{유동인구지수:118,임대료지수:106,카드매출지수:109,prev:{카드매출지수:101},
+   업종:{음식:{점포수:5210,연폐업률:11.8,평균영업기간_년:3.1},소매:{점포수:3890,연폐업률:9.2,평균영업기간_년:4.5},제조:{점포수:410,연폐업률:6.1,평균영업기간_년:6.2}}},
+ "경기도 성남시 분당구":{유동인구지수:104,임대료지수:112,카드매출지수:103,prev:{카드매출지수:104},
+   업종:{음식:{점포수:4120,연폐업률:9.5,평균영업기간_년:3.8},소매:{점포수:2980,연폐업률:8.1,평균영업기간_년:5.0}}},
+ "경기도 부천시":{유동인구지수:96,임대료지수:88,카드매출지수:97,prev:{카드매출지수:99},
+   업종:{음식:{점포수:6350,연폐업률:12.4,평균영업기간_년:2.9},소매:{점포수:5120,연폐업률:10.6,평균영업기간_년:4.1}}},
+ "경기도 수원시":{유동인구지수:101,임대료지수:92,카드매출지수:105,prev:{카드매출지수:100},
+   업종:{음식:{점포수:7480,연폐업률:11.1,평균영업기간_년:3.2},소매:{점포수:5890,연폐업률:9.8,평균영업기간_년:4.3},제조:{점포수:980,연폐업률:5.9,평균영업기간_년:6.8}}}}};
+
+const FORBIDDEN=["보장","확실","무조건","반드시 선정","100%","틀림없"];
+const DISCLAIMER="본 안내는 참고용 정보이며 실제 승인 여부·조건은 심사에 따라 달라질 수 있습니다. 상권 지표는 시연용 가정치입니다.";
+
+/* ══════════ 룰 엔진 (rules.py 포팅) ══════════ */
+const years=f=>Math.round((Date.now()-new Date(f))/315576e5*10)/10;
+
+function evaluate(m,a){
+  const r=a.req,reasons=[],fails=[],y=years(m.founded);
+  const push=(arr,field,detail)=>arr.push({detail,clause:(r.ev||{})[field]||""});
+  if(r.min_years!=null)(y>=r.min_years?push(reasons,"min_years",`업력 ${y}년 → 최소 ${r.min_years}년 충족`)
+                                      :push(fails,"min_years",`업력 ${y}년 → 최소 ${r.min_years}년 미달`));
+  if(r.max_years!=null)(y<r.max_years?push(reasons,"max_years",`업력 ${y}년 → ${r.max_years}년 미만 충족`)
+                                     :push(fails,"max_years",`업력 ${y}년 → ${r.max_years}년 미만 초과`));
+  if(r.allowed_ksic){const hit=r.allowed_ksic.some(p=>m.ksic.startsWith(p));
+    (hit?push(reasons,"allowed_ksic",`업종 ${m.ksic}(${m.ksic_name}) → 허용 업종 해당`)
+        :push(fails,"allowed_ksic",`업종 ${m.ksic} → 허용 업종 [${r.allowed_ksic}] 비해당`));}
+  if(r.regions){const hit=r.regions.some(x=>m.region.includes(x));
+    (hit?push(reasons,"regions",`소재지 ${m.region} → 지역요건 충족`)
+        :push(fails,"regions",`소재지 ${m.region} → 지역요건 [${r.regions}] 미충족`));}
+  if(r.min_employees!=null)(m.employees>=r.min_employees
+    ?push(reasons,"min_employees",`상시근로자 ${m.employees}인 → ${r.min_employees}인 이상 충족`)
+    :push(fails,"min_employees",`상시근로자 ${m.employees}인 → ${r.min_employees}인 이상 미달`));
+  if(r.max_employees!=null)(m.employees<r.max_employees
+    ?push(reasons,"max_employees",`상시근로자 ${m.employees}인 → ${r.max_employees}인 미만 충족`)
+    :push(fails,"max_employees",`상시근로자 ${m.employees}인 → ${r.max_employees}인 미만 초과`));
+  if(r.required_certs){const miss=r.required_certs.filter(c=>!m.certs.includes(c));
+    (miss.length?push(fails,"required_certs",`필수 인증 [${miss}] 미보유`)
+                :push(reasons,"required_certs",`필수 인증 보유`));}
+  const human=r.human||[];
+  const status=fails.length?"INELIGIBLE":(human.length?"CONDITIONAL":"ELIGIBLE");
+  const confidence=Math.round(r.conf*Math.pow(0.95,human.length)*1000)/1000;
+  return {ann:a,status,reasons,fails,human,confidence};
+}
+const priority=v=>{
+  const left=Math.max((new Date(v.ann.deadline)-Date.now())/864e5,0);
+  return Math.max(0,1-left/180)-0.1*v.human.length;
+};
+
+/* ══════════ 에이전트 (F1~F4 포팅) ══════════ */
+function policyRun(m){
+  const today=new Date();
+  const verdicts=ANNS.filter(a=>new Date(a.deadline)>=today).map(a=>evaluate(m,a));
+  const hits=verdicts.filter(v=>v.status!=="INELIGIBLE")
+                     .sort((a,b)=>priority(b)-priority(a));
+  const summary=hits.length
+    ?`📋 정책자금: 지원 가능성이 있는 공고 ${hits.length}건을 찾았어요. 우선 검토는 「${hits[0].ann.title}」(마감 ${hits[0].ann.deadline}, ${hits[0].ann.support})입니다.`
+    :"📋 정책자금: 현재 프로필로 자동 판정된 적격 공고가 없어요. 프로필을 다시 확인해 볼까요?";
+  return {summary,hits};
+}
+function districtRun(m){
+  const d=SNAP.지역[m.region];
+  if(!d)return{summary:`🗺️ 상권진단: ${m.region} 지표가 아직 준비되지 않았어요.`,score:null};
+  const sec=d.업종[m.sector]||null;let score=50;const str=[],risk=[];
+  score+=(d.유동인구지수-100)*0.5;
+  (d.유동인구지수>=105?str:d.유동인구지수<95?risk:str).push(`유동인구지수 ${d.유동인구지수}`);
+  const tr=(d.카드매출지수-d.prev.카드매출지수)/d.prev.카드매출지수*100;score+=tr*1.5;
+  (tr>1?str:tr<-1?risk:str).push(`카드매출지수 ${d.카드매출지수} (전월 ${tr>=0?"+":""}${tr.toFixed(1)}%)`);
+  score-=Math.max(d.임대료지수-100,0)*0.4;
+  if(d.임대료지수>108)risk.push(`임대료지수 ${d.임대료지수} — 고정비 부담 유의`);
+  if(sec){score-=Math.max(sec.연폐업률-10,0)*1.2;
+    (sec.연폐업률>11?risk:str).push(`${m.sector}업 연폐업률 ${sec.연폐업률}% (점포 ${sec.점포수.toLocaleString()}곳, 평균 영업 ${sec.평균영업기간_년}년)`);}
+  score=Math.round(Math.min(Math.max(score,5),95)*10)/10;
+  const grade=score>=65?"양호":score>=45?"보통":"주의";
+  return {summary:`🗺️ 상권진단: ${m.region} ${m.dong||""} ${m.sector}업 기준 상권 점수 ${score}점(${grade}). `
+    +(str[0]?`강점: ${str[0]}. `:"")+(risk[0]?`유의점: ${risk[0]}.`:""),
+    score,grade,str,risk,지표:{유동인구지수:d.유동인구지수,임대료지수:d.임대료지수,카드매출지수:d.카드매출지수},기준일:SNAP.기준일};
+}
+function productsRun(m,policyHits){
+  const y=years(m.founded),purpose=m.purpose||"운전자금",recs=[];
+  for(const p of PRODUCTS){
+    if(!p.purpose.includes(purpose))continue;
+    const rq=p.req,why=[];let ok=true;
+    if(rq.min_years!=null){if(y>=rq.min_years)why.push(`업력 ${y}년 ≥ ${rq.min_years}년`);else ok=false;}
+    if(rq.max_years!=null){if(y<rq.max_years)why.push(`업력 ${y}년 < ${rq.max_years}년 (창업 특례)`);else ok=false;}
+    if(rq.max_employees!=null&&m.employees>rq.max_employees)ok=false;
+    if(rq.sectors){if(rq.sectors.includes(m.sector))why.push(`${m.sector}업 — 매출연계 대상`);else ok=false;}
+    if(!ok)continue;
+    const bonus=(p.pair&&policyHits&&policyHits.length)?0.2:0;
+    if(bonus)why.push("적격 정책자금과 결합 시 금리 절감 여지");
+    recs.push({...p,why,rank:why.length*0.1+bonus});
+  }
+  recs.sort((a,b)=>b.rank-a.rank);
+  const summary=recs.length
+    ?`💳 금융상품: ${purpose} 목적으로 ${recs.length}개 상품이 조건에 맞아요. 우선 검토는 「${recs[0].name}」(한도 ${recs[0].max}억, ${recs[0].rate}).`
+     +((policyHits&&policyHits.length&&recs[0].pair)?" 적격 정책자금과 묶으면 실부담 금리를 낮출 여지가 있어요.":"")
+    :`💳 금융상품: ${purpose} 목적으로 자동 매칭된 상품이 없어요. 상담 연결을 추천드려요.`;
+  return {summary,recs,purpose};
+}
+function monitorAlerts(m){
+  const out=[],dr=SNAP.기준금리-SNAP.이전기준금리;
+  if(Math.abs(dr)>=0.25)out.push(`기준금리 ${Math.abs(dr).toFixed(2)}%p ${dr<0?"인하":"인상"} (${SNAP.이전기준금리}%→${SNAP.기준금리}%) — ${dr<0?"변동금리 이자 부담 완화, 대환 검토 적기":"이자 부담 증가 유의"}`);
+  const d=SNAP.지역[m.region];
+  if(d){const chg=(d.카드매출지수-d.prev.카드매출지수)/d.prev.카드매출지수*100;
+    if(Math.abs(chg)>=3)out.push(`${m.region} 카드매출지수 전월 대비 ${chg>=0?"+":""}${chg.toFixed(1)}% — ${chg>0?"상권 회복세, 재고·마케팅 확대 검토":"매출 둔화 신호, 운전자금 여력 점검"}`);}
+  const today=new Date();
+  for(const a of ANNS){const left=Math.floor((new Date(a.deadline)-today)/864e5);
+    if(left>=0&&left<=14)out.push(`「${a.title}」 신청 마감 D-${left} (${a.deadline})`);}
+  return out;
+}
+
+/* ══════════ 라우터·감사·합성 ══════════ */
+const KW={policy:["정책자금","지원사업","정부지원","지원금","보조금","공고","정책"],
+          product:["대출","금리","상품","보증","빌리","운전자금","시설자금","자금"],
+          district:["상권","입지","장사","자리","동네","손님","유동인구","폐업","매출"]};
+function route(q){
+  const hits=Object.keys(KW).filter(i=>KW[i].some(k=>q.includes(k)));
+  if(hits.includes("policy")&&hits.includes("product")&&!q.includes("대출")&&!q.includes("상품"))
+    hits.splice(hits.indexOf("product"),1);
+  return hits.length?hits:["smalltalk"];
+}
+const sanitize=t=>t.split("\n").filter(l=>l.trim()&&!FORBIDDEN.some(p=>l.includes(p))).join("\n");
+
+async function synthesize(query,results,m){
+  const facts=Object.values(results).map(r=>r.summary).join("\n\n");
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:700,
+        system:"소상공인 금융 파트너 챗봇입니다. 아래 '분석 결과'에 있는 사실만으로 사장님께 드리는 친근하고 간결한 답변을 쓰세요. 확정·보장 표현 금지, 수치는 결과에 있는 것만, 마지막에 다음 행동 제안 1개. 이모지 절 제목은 유지.",
+        messages:[{role:"user",content:`사업자: ${m.name}\n질문: ${query}\n분석 결과:\n${facts}`}]})});
+    const data=await res.json();
+    const txt=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+    if(txt)return {text:sanitize(txt),live:true};
+  }catch(e){/* 오프라인·차단 → 폴백 */}
+  return {text:facts,live:false};
+}
+
+/* ══════════ UI ══════════ */
+let M=null;const $=id=>document.getElementById(id);
+const QUICK=["우리 동네 상권 어때?","받을 수 있는 정책자금 알려줘","대출 상품 추천해줘"];
+
+function init(){
+  $("merchantList").innerHTML=MERCHANTS.map((m,i)=>
+    `<div class="m-card" tabindex="0" role="button" onclick="start(${i})" onkeydown="if(event.key==='Enter')start(${i})">
+       <b>${m.name}</b><div class="sub">${m.ksic_name} · ${m.region} · 직원 ${m.employees}명 · ${m.purpose}</div></div>`).join("");
+  $("fRegion").innerHTML=Object.keys(SNAP.지역).map(r=>`<option>${r}</option>`).join("");
+  $("quick").innerHTML=QUICK.map(q=>`<button type="button" onclick="ask('${q}')">${q}</button>`).join("");
+}
+function start(i){M=MERCHANTS[i];enterMain();}
+function startCustom(){
+  const sector=$("fSector").value,[ksic,ksic_name]=KSIC_MAP[sector];
+  M={name:$("fName").value||"우리가게",owner:$("fOwner").value||"사장",sector,ksic,ksic_name,
+     founded:$("fFounded").value||"2024-01-01",region:$("fRegion").value,dong:"",
+     employees:+$("fEmp").value||0,revenue_krw:(+$("fRev").value||0)*10000,certs:[],
+     purpose:$("fPurpose").value};
+  enterMain();
+}
+function enterMain(){
+  $("onboard").classList.add("hidden");
+  ["alerts","chat","composer"].forEach(id=>$(id).classList.remove("hidden"));
+  $("hdrName").textContent=M.name;
+  $("alerts").innerHTML=monitorAlerts(M).map(a=>`<div class="alert-chip">🔔 ${a}</div>`).join("");
+  botBubble(`안녕하세요 ${M.owner} 사장님! 👋 ${M.name}의 금융 파트너예요.\n상권 진단, 정책자금 찾기, 대출 상품 추천을 도와드릴 수 있어요. 아래 버튼을 누르거나 편하게 물어보세요.`);
+  $("query").focus();
+}
+function bubble(cls,html){const el=document.createElement("div");el.className="msg "+cls;
+  el.innerHTML=html;$("chat").appendChild(el);$("chat").scrollTop=$("chat").scrollHeight;return el;}
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function botBubble(text,detailHtml=""){
+  bubble("bot",esc(text).replace(/\n/g,"<br>")+detailHtml+
+    `<span class="disclaimer">${DISCLAIMER}</span>`);}
+
+function detailsHtml(results){
+  let h="";
+  if(results.policy&&results.policy.hits.length){
+    h+=`<details><summary>정책자금 판정 상세 (${results.policy.hits.length}건 · 근거 포함)</summary>`;
+    for(const v of results.policy.hits){
+      h+=`<div class="v-card"><span class="stamp ${v.status==="CONDITIONAL"?"cond":""}">${v.status==="ELIGIBLE"?"적 격":"조건부"}</span>
+          <div class="t">${v.ann.title}</div>
+          <div class="meta">${v.ann.agency} · 마감 ${v.ann.deadline} · ${v.ann.support} · 판정 신뢰도 ${v.confidence.toFixed(2)}</div>`;
+      for(const r of v.reasons){h+=`<div class="reason ok">${r.detail}</div>`;
+        if(r.clause)h+=`<div class="evidence">${r.clause}</div>`;}
+      for(const c of v.human)h+=`<div class="reason chk">확인 필요 — ${c}</div>`;
+      h+=`</div>`;}
+    h+=`</details>`;}
+  if(results.product&&results.product.recs.length){
+    h+=`<details><summary>상품 추천 상세 (${results.product.recs.length}건)</summary>`;
+    for(const p of results.product.recs)
+      h+=`<div class="p-row"><div class="t">${p.name}</div>
+          <div class="meta">한도 ${p.max}억 · ${p.rate}</div>
+          <div class="why">${p.desc} · ${p.why.join(" · ")}</div></div>`;
+    h+=`</details>`;}
+  if(results.district&&results.district.score!=null){const d=results.district;
+    h+=`<details><summary>상권 지표 상세 (기준일 ${d.기준일})</summary><div class="metric-row">`
+      +Object.entries(d.지표).map(([k,v])=>`<div class="metric"><div class="n">${v}</div><div class="l">${k}</div></div>`).join("")
+      +`</div>`+d.str.map(s=>`<div class="reason ok">${s}</div>`).join("")
+      +d.risk.map(r=>`<div class="reason chk">${r}</div>`).join("")
+      +`<div class="src-note">점포수 출처: 스냅샷(시연용 가정치) — 실서비스는 소진공 상가정보 API</div></details>`;}
+  return h;
+}
+
+async function ask(q){
+  bubble("user",esc(q));
+  const typing=bubble("typing","사장님 상황에 맞춰 확인 중…");
+  const intents=route(q),results={};
+  if(intents.includes("policy"))results.policy=policyRun(M);
+  if(intents.includes("product"))results.product=productsRun(M,results.policy?results.policy.hits:null);
+  if(intents.includes("district"))results.district=districtRun(M);
+  if(intents[0]==="smalltalk"&&intents.length===1){
+    typing.remove();
+    botBubble(`무엇이든 물어보세요, ${M.owner} 사장님! 예를 들면 — "우리 동네 상권 어때?", "정책자금 뭐 있어?", "운전자금 대출 추천해줘"`);
+    return;
+  }
+  const synth=await synthesize(q,results,M);
+  typing.remove();
+  botBubble(synth.text,detailsHtml(results));
+  $("modeLine").textContent=`판정: 룰 엔진 · 문장: ${synth.live?"Claude LIVE":"템플릿(폴백)"} · 상권지표: 시연용 가정치`;
+}
+function onSend(e){e.preventDefault();const q=$("query").value.trim();
+  if(!q)return;$("query").value="";ask(q);}
+init();
+</script>
+</body>
+</html>
