@@ -1,5 +1,5 @@
 # main.py — FinAgent MVP 백엔드
-import asyncio, pathlib
+import asyncio, os, pathlib
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from agents import mac, risk, live_rate, news_feed
+from agents import mac, risk, live_rate, news_feed, naver_news
 
 load_dotenv()
 app = FastAPI(title="FinAgent — 금융 멀티에이전트 MVP")
@@ -24,6 +24,31 @@ def _sanitize(text: str) -> str:
     return text.encode("utf-8", "replace").decode("utf-8")
 
 
+_seen_naver_links: set[str] = set()
+
+
+async def _naver_news_loop():
+    """네이버 뉴스 검색 API로 새 기사만 실시간 피드에 추가 (키 없으면 즉시 종료)."""
+    if not naver_news.enabled():
+        return
+    interval = int(os.getenv("NAVER_REFRESH_SEC", "300"))
+    while True:
+        try:
+            for q in naver_news.queries():
+                for art in await asyncio.to_thread(naver_news.search, q, 5):
+                    link = art["link"]
+                    if not link or link in _seen_naver_links:
+                        continue
+                    _seen_naver_links.add(link)
+                    if len(_seen_naver_links) > 500:
+                        _seen_naver_links.clear()
+                    text = f"{art['title']} — {art['description']}".strip(" —")
+                    news_feed.add(_sanitize(text), source="naver", link=link)
+        except Exception as e:
+            print(f"[naver_news_loop] 수집 실패, 다음 주기에 재시도: {e}")
+        await asyncio.sleep(interval)
+
+
 @app.on_event("startup")
 async def _startup():
     await asyncio.to_thread(live_rate.refresh, True)   # 기동 시 1회 즉시 갱신
@@ -34,6 +59,7 @@ async def _startup():
             await asyncio.to_thread(live_rate.refresh, True)
 
     asyncio.create_task(_loop())
+    asyncio.create_task(_naver_news_loop())
 
 
 class PipelineReq(BaseModel):
@@ -64,7 +90,8 @@ class DrpReq(BaseModel):
 @app.get("/api/health")
 async def health():
     return {"ok": True, "agents": ["DataAnalysis", "InvestmentResearch",
-                                    "RiskManagement", "MACOrchestrator"]}
+                                    "RiskManagement", "MACOrchestrator"],
+            "naver_news_live": naver_news.enabled()}
 
 
 @app.post("/api/pipeline")

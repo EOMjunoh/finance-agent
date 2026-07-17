@@ -77,8 +77,11 @@ textarea:focus{outline:none;border-color:var(--yellow)}
 .feed-item .txt{font-size:12.5px;flex:1;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .feed-item .meta{font-size:10.5px;color:var(--ink-soft);white-space:nowrap;text-align:right}
-.feed-item .meta .new{display:inline-block;margin-top:4px;font-size:9.5px;font-weight:800;
+.feed-item .meta .new{display:inline-block;font-size:9.5px;font-weight:800;
   color:var(--coral);background:var(--coral-bg);padding:2px 6px;border-radius:6px}
+.feed-item .meta .src-link{display:block;margin-top:4px;font-size:10.5px;font-weight:700;
+  color:var(--yellow-deep);text-decoration:none}
+.feed-item .meta .src-link:hover{text-decoration:underline}
 .feed-list{max-height:260px;overflow-y:auto}
 .feed-empty{font-size:12.5px;color:var(--ink-soft);padding:10px 0}
 .push-row{display:flex;gap:8px;margin-top:12px}
@@ -366,6 +369,8 @@ renderStepper();
   try{
     const r = await fetch('/api/health'); const j = await r.json();
     if(j.ok){ $('apiStatus').textContent = '에이전트 4개 온라인'; $('apiStatus').classList.add('on'); }
+    $('feedLiveTag').textContent = j.naver_news_live ? '네이버 뉴스 실시간 수집 중' : '폴링 중 (수동 피드)';
+    $('feedLiveTag').className = 'tag ' + (j.naver_news_live ? 'live' : 't');
   }catch(e){ $('apiStatus').textContent = 'API 미연결 — 서버 실행 필요'; }
 })();
 
@@ -380,14 +385,18 @@ function timeAgo(ts){
   return `${Math.floor(s/3600)}시간 전`;
 }
 
+const SOURCE_LABEL = {sample:'샘플', manual:'속보', naver:'네이버'};
+
 function renderFeedItem(it, isNew){
   const el = document.createElement('div');
   el.className = 'feed-item' + (selectedFeedId===it.id ? ' sel' : '');
   el.dataset.id = it.id;
   el.onclick = () => selectFeedItem(it);
+  const link = it.link
+    ? `<br><a href="${it.link}" target="_blank" rel="noopener" class="src-link" onclick="event.stopPropagation()">원문 보기 ↗</a>` : '';
   el.innerHTML = `
     <div class="txt">${it.text.replace(/</g,'&lt;')}</div>
-    <div class="meta">${it.source==='sample'?'샘플':'속보'} · ${timeAgo(it.ts)}${isNew?'<br><span class="new">NEW</span>':''}</div>`;
+    <div class="meta">${SOURCE_LABEL[it.source] || it.source} · ${timeAgo(it.ts)}${isNew?' <span class="new">NEW</span>':''}${link}</div>`;
   return el;
 }
 

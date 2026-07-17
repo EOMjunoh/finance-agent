@@ -18,15 +18,15 @@ def _seed() -> None:
     if _items:
         return
     text = _SAMPLE_PATH.read_text(encoding="utf-8").strip()
-    _items.append({"id": next(_counter), "ts": time.time(), "text": text, "source": "sample"})
+    _items.append({"id": next(_counter), "ts": time.time(), "text": text, "source": "sample", "link": None})
 
 
-def add(text: str, source: str = "manual") -> dict:
+def add(text: str, source: str = "manual", link: str | None = None) -> dict:
     text = (text or "").strip()
     if not text:
         raise ValueError("empty text")
     _seed()
-    item = {"id": next(_counter), "ts": time.time(), "text": text, "source": source}
+    item = {"id": next(_counter), "ts": time.time(), "text": text, "source": source, "link": link}
     _items.append(item)
     del _items[:-_MAX]
     return item
