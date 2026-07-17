@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinAgent — 금융 멀티에이전트 MVP</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --yellow:#FFBC00; --yellow-deep:#B8860B; --ink:#26231C; --ink-soft:#6B655A;
+  --paper:#F7F4EC; --card:#FFFFFF; --line:#E8E2D4; --tint:#FFF4D6;
+  --teal:#0F6E56; --teal-bg:#E4F2ED; --coral:#B4552F; --coral-bg:#F9ECE5;
+  --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;
+  background:var(--paper);color:var(--ink);line-height:1.6;min-height:100vh}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px}
+
+/* ── 헤더 ── */
+header{display:flex;align-items:center;gap:14px;padding:28px 0 8px}
+.logo{width:38px;height:38px;background:var(--yellow);border-radius:10px;display:flex;
+  align-items:center;justify-content:center;font-weight:900;font-size:18px;color:var(--ink)}
+header h1{font-size:21px;font-weight:800;letter-spacing:-.3px}
+header p{font-size:12.5px;color:var(--ink-soft)}
+.status{margin-left:auto;font-size:12px;font-weight:700;padding:6px 12px;border-radius:99px;
+  background:var(--card);border:1px solid var(--line);color:var(--ink-soft)}
+.status.on{background:var(--teal-bg);color:var(--teal);border-color:transparent}
+
+/* ── 입력부 ── */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;margin-top:20px}
+.panel h2{font-size:15px;font-weight:800;margin-bottom:4px}
+.panel .hint{font-size:12.5px;color:var(--ink-soft);margin-bottom:12px}
+textarea{width:100%;min-height:96px;padding:14px;border:1.5px solid var(--line);
+  border-radius:10px;font-family:inherit;font-size:14px;resize:vertical;background:var(--paper)}
+textarea:focus{outline:none;border-color:var(--yellow)}
+.run-row{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap}
+.btn{padding:13px 26px;border:none;border-radius:11px;background:var(--yellow);
+  font-family:inherit;font-size:14.5px;font-weight:800;color:var(--ink);cursor:pointer;
+  transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{background:#E9E3D4;color:#A9A294;cursor:default}
+.btn.sm{padding:10px 18px;font-size:13px}
+.agents{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:12px;font-weight:700;padding:7px 13px;border-radius:99px;
+  background:var(--paper);border:1px solid var(--line);color:var(--ink-soft);
+  display:flex;align-items:center;gap:6px;transition:.3s}
+.chip i{width:7px;height:7px;border-radius:50%;background:#C9C3B4}
+.chip.run{background:var(--tint);color:var(--yellow-deep);border-color:var(--yellow)}
+.chip.run i{background:var(--yellow);animation:blink .7s infinite}
+.chip.done{background:var(--teal-bg);color:var(--teal);border-color:transparent}
+.chip.done i{background:var(--teal)}
+@keyframes blink{50%{opacity:.3}}
+
+/* ── 결과 그리드 ── */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.card h3{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.tag{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:6px;
+  background:var(--tint);color:var(--yellow-deep)}
+.tag.t{background:var(--teal-bg);color:var(--teal)}
+.tag.c{background:var(--coral-bg);color:var(--coral)}
+.summary{font-size:13.5px;background:var(--paper);border-radius:10px;padding:13px;line-height:1.7}
+.ent-group{margin-top:12px}
+.ent-group b{font-size:11.5px;color:var(--ink-soft);display:block;margin-bottom:5px}
+.ents{display:flex;gap:6px;flex-wrap:wrap}
+.ent{font-size:12px;font-weight:700;padding:4px 10px;border-radius:7px;background:var(--tint);color:var(--yellow-deep)}
+.ent.rate{background:var(--teal-bg);color:var(--teal)}
+.ent.date{background:var(--paper);color:var(--ink-soft);border:1px solid var(--line)}
+.rel{font-size:12.5px;padding:8px 10px;border-left:3px solid var(--yellow);background:var(--paper);
+  margin-top:6px;border-radius:0 8px 8px 0}
+
+/* 감성 게이지 */
+.sa-bar{height:12px;background:linear-gradient(90deg,var(--coral-bg),var(--paper),var(--teal-bg));
+  border-radius:99px;position:relative;margin:18px 0 6px}
+.sa-dot{position:absolute;top:50%;width:20px;height:20px;border-radius:50%;background:var(--ink);
+  border:3px solid var(--card);transform:translate(-50%,-50%);transition:left .8s cubic-bezier(.2,.8,.2,1)}
+.sa-lab{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-soft)}
+.big{font-size:26px;font-weight:900;letter-spacing:-.5px}
+.big small{font-size:12.5px;color:var(--ink-soft);font-weight:600}
+
+/* 스파크라인 */
+.spark{width:100%;height:110px;margin-top:8px}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink-soft);margin-top:4px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:4px}
+
+/* MAC 카드 */
+.mac{grid-column:1/-1;display:grid;grid-template-columns:150px 1fr;gap:22px;align-items:center}
+@media(max-width:800px){.mac{grid-template-columns:1fr}}
+.ring-wrap{text-align:center}
+.ring{width:130px;height:130px}
+.ring circle{fill:none;stroke-width:11}
+.ring .bg{stroke:var(--paper)}
+.ring .fg{stroke:var(--yellow);stroke-linecap:round;stroke-dasharray:339;
+  stroke-dashoffset:339;transition:stroke-dashoffset 1s ease}
+.ring text{font-family:inherit;font-weight:900;font-size:24px;fill:var(--ink)}
+.verdict{font-size:14px;background:var(--tint);border-radius:10px;padding:14px;line-height:1.7}
+.mac-list{margin-top:10px;font-size:12.5px}
+.mac-list .r{color:var(--teal);padding:3px 0}
+.mac-list .c{color:var(--coral);padding:3px 0}
+
+/* 리스크 도구 */
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:800px){.tools{grid-template-columns:1fr}}
+.field{margin-top:11px}
+.field label{font-size:12.5px;font-weight:700;display:block;margin-bottom:5px}
+.field input[type=number]{width:100%;padding:11px;border:1.5px solid var(--line);
+  border-radius:9px;font-family:inherit;font-size:14px;background:var(--paper)}
+.field input:focus{outline:none;border-color:var(--yellow)}
+.checks{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.checks label{font-size:12.5px;display:flex;align-items:center;gap:6px;cursor:pointer}
+.gauge{height:14px;background:var(--paper);border-radius:99px;overflow:hidden;margin-top:14px;position:relative}
+.gauge>i{display:block;height:100%;width:0;border-radius:99px;transition:width .9s ease;background:var(--teal)}
+.gauge.warn>i{background:var(--yellow)} .gauge.danger>i{background:var(--coral)}
+.gauge .mark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.4}
+.result-box{margin-top:14px;display:none}
+.result-box.show{display:block}
+.grade{font-size:15px;font-weight:900;margin-top:10px}
+.grade.safe{color:var(--teal)} .grade.warn{color:var(--yellow-deep)} .grade.danger{color:var(--coral)}
+.reasons{margin-top:8px;font-size:12.5px}
+.reasons li{margin:4px 0 4px 16px}
+.actions-box{margin-top:10px;background:var(--paper);border-radius:9px;padding:11px;font-size:12.5px}
+.actions-box b{font-size:11.5px;color:var(--ink-soft)}
+
+footer{margin-top:36px;font-size:11.5px;color:var(--ink-soft);text-align:center;line-height:1.8}
+.hide{display:none}
+.audit{font-size:11.5px;width:100%;border-collapse:collapse;margin-top:6px}
+.audit td{padding:6px 8px;border-bottom:1px dashed var(--line)}
+.audit td:last-child{text-align:right;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">F</div>
+    <div>
+      <h1>FinAgent</h1>
+      <p>금융 멀티에이전트 MVP — Data Analysis · Research · Risk · MAC</p>
+    </div>
+    <span class="status" id="apiStatus">API 확인 중…</span>
+  </header>
+
+  <!-- 파이프라인 실행 -->
+  <div class="panel">
+    <h2>분석 파이프라인</h2>
+    <p class="hint">뉴스·공시 텍스트를 붙여넣거나, 비워두면 시연용 샘플 기사로 실행됩니다.</p>
+    <textarea id="newsInput" placeholder="예) 한국은행이 기준금리를 2.50%로 인하하면서…"></textarea>
+    <div class="run-row">
+      <button class="btn" id="runBtn" onclick="runPipeline()">파이프라인 실행</button>
+      <div class="agents">
+        <span class="chip" id="ch-da"><i></i>Data Analysis</span>
+        <span class="chip" id="ch-ir"><i></i>Investment Research</span>
+        <span class="chip" id="ch-rm"><i></i>Risk Management</span>
+        <span class="chip" id="ch-mac"><i></i>MAC Orchestrator</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 결과 그리드 -->
+  <div class="grid hide" id="resultGrid">
+    <div class="card">
+      <h3>뉴스 인사이트 <span class="tag">TS</span><span class="tag">NER</span><span class="tag">FRE</span></h3>
+      <div class="summary" id="tsSummary"></div>
+      <div class="ent-group"><b>기관 (ORG)</b><div class="ents" id="entOrg"></div></div>
+      <div class="ent-group"><b>수치 (RATE · MONEY)</b><div class="ents" id="entNum"></div></div>
+      <div class="ent-group"><b>추출된 관계 (FRE)</b><div id="freList"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>시장 분석 <span class="tag t">SA</span><span class="tag t">EC</span><span class="tag t">TSF</span></h3>
+      <div class="big" id="saLabel"></div>
+      <div class="sa-bar"><div class="sa-dot" id="saDot" style="left:50%"></div></div>
+      <div class="sa-lab"><span>부정 −1</span><span>중립 0</span><span>긍정 +1</span></div>
+      <div class="ent-group"><b>이벤트 분류</b><div class="ents" id="ecTags"></div></div>
+      <div class="ent-group"><b>기준금리 12개월 + 3개월 예측</b>
+        <svg class="spark" id="spark" viewBox="0 0 460 110" preserveAspectRatio="none"></svg>
+        <div class="legend"><span><i style="background:var(--ink)"></i>실적</span>
+        <span><i style="background:var(--yellow)"></i>예측</span>
+        <span id="trendBadge" class="tag t"></span></div>
+      </div>
+    </div>
+
+    <div class="card mac">
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 130 130">
+          <circle class="bg" cx="65" cy="65" r="54"/>
+          <circle class="fg" id="ringFg" cx="65" cy="65" r="54" transform="rotate(-90 65 65)"/>
+          <text x="65" y="73" text-anchor="middle" id="ringTxt">–</text>
+        </svg>
+        <div style="font-size:12px;color:var(--ink-soft);font-weight:700">MAC 통합 신뢰도</div>
+      </div>
+      <div>
+        <h3>MAC 통합 판단 <span class="tag">Verbal Reinforcement</span></h3>
+        <div class="verdict" id="verdict"></div>
+        <div class="mac-list" id="macList"></div>
+        <table class="audit" id="auditTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 리스크 도구 -->
+  <div class="tools">
+    <div class="card">
+      <h3>전세사기 위험 진단 <span class="tag c">FD</span></h3>
+      <div class="field"><label>전세 보증금 (만원)</label><input type="number" id="fd-deposit" value="18000"></div>
+      <div class="field"><label>주택 매매 시세 (만원)</label><input type="number" id="fd-price" value="20000"></div>
+      <div class="field"><label>선순위 근저당 (만원)</label><input type="number" id="fd-mortgage" value="0"></div>
+      <div class="checks">
+        <label><input type="checkbox" id="fd-trust"> 신탁 등기</label>
+        <label><input type="checkbox" id="fd-tax"> 임대인 체납</label>
+        <label><input type="checkbox" id="fd-multi"> 다주택 임대인</label>
+      </div>
+      <div class="run-row"><button class="btn sm" onclick="runFraud()">위험 진단</button></div>
+      <div class="result-box" id="fdBox">
+        <div class="gauge" id="fdGauge"><i id="fdBar"></i></div>
+        <div class="grade" id="fdGrade"></div>
+        <ul class="reasons" id="fdReasons"></ul>
+        <div class="actions-box" id="fdActions"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>부채 리스크 (DSR) <span class="tag c">DRP</span></h3>
+      <div class="field"><label>연소득 (만원)</label><input type="number" id="dr-income" value="3200"></div>
+      <div class="field"><label>기존 대출 연 상환액 (만원)</label><input type="number" id="dr-existing" value="0"></div>
+      <div class="field"><label>신규 대출 원금 (만원)</label><input type="number" id="dr-loan" value="15000"></div>
+      <div class="field"><label>금리 (%)</label><input type="number" id="dr-rate" value="3.5" step="0.1"></div>
+      <div class="run-row"><button class="btn sm" onclick="runDrp()">DSR 계산</button></div>
+      <div class="result-box" id="drBox">
+        <div class="gauge" id="drGauge"><div class="mark" style="left:40%"></div><i id="drBar"></i></div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">▲ 검정선 = 은행권 DSR 40% 규제선</div>
+        <div class="grade" id="drGrade"></div>
+        <div class="reasons" id="drMsg" style="margin-top:6px;font-size:13px"></div>
+        <div class="actions-box" id="drDetail"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    본 서비스의 모든 판단·점수·예측은 데모용 규칙·통계 모델의 출력이며 투자·계약 의사결정의 근거가 될 수 없습니다.<br>
+    금리 데이터는 샘플이며 실서비스 전 최신 데이터로 교체가 필요합니다. · FinAgent MVP
+  </footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ── 헬스체크 ── */
+(async()=>{
+  try{
+    const r = await fetch('/api/health'); const j = await r.json();
+    if(j.ok){ $('apiStatus').textContent = '에이전트 4개 온라인'; $('apiStatus').classList.add('on'); }
+  }catch(e){ $('apiStatus').textContent = 'API 미연결 — 서버 실행 필요'; }
+})();
+
+/* ── 파이프라인 ── */
+async function runPipeline(){
+  const btn = $('runBtn'); btn.disabled = true; btn.textContent = '분석 중…';
+  ['ch-da','ch-ir','ch-rm','ch-mac'].forEach(id=>{ $(id).className='chip'; });
+  ['ch-da','ch-ir','ch-rm'].forEach((id,i)=> setTimeout(()=> $(id).classList.add('run'), i*250));
+  try{
+    const res = await fetch('/api/pipeline',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({text: $('newsInput').value || null})});
+    const d = await res.json();
+    ['ch-da','ch-ir','ch-rm'].forEach(id=>{ $(id).classList.remove('run'); $(id).classList.add('done'); });
+    $('ch-mac').classList.add('run');
+    setTimeout(()=>{ $('ch-mac').classList.remove('run'); $('ch-mac').classList.add('done'); render(d); }, 500);
+  }catch(e){
+    alert('파이프라인 호출 실패: '+e.message);
+  }finally{
+    btn.disabled = false; btn.textContent = '파이프라인 실행';
+  }
+}
+
+function chipEl(txt, cls=''){ const s=document.createElement('span'); s.className='ent '+cls; s.textContent=txt; return s; }
+
+function render(d){
+  $('resultGrid').classList.remove('hide');
+  // TS
+  $('tsSummary').textContent = d.data_analysis.ts.summary;
+  // NER
+  const e = d.data_analysis.ner.entities;
+  $('entOrg').replaceChildren(...(e.ORG.length? e.ORG.map(o=>chipEl(o)) : [chipEl('없음','date')]));
+  const nums = [...e.RATE.map(r=>chipEl(r,'rate')), ...e.MONEY.map(m=>chipEl(m,'rate')), ...e.DATE.map(t=>chipEl(t,'date'))];
+  $('entNum').replaceChildren(...(nums.length? nums : [chipEl('없음','date')]));
+  // FRE
+  const fl = $('freList'); fl.innerHTML='';
+  const rels = d.data_analysis.fre.relations;
+  if(rels.length){ rels.forEach(r=>{ const div=document.createElement('div'); div.className='rel';
+    div.textContent = `${r.subject} → ${r.action} (${r.type})`; fl.appendChild(div); }); }
+  else fl.innerHTML = '<div class="rel">추출된 관계 없음</div>';
+  // SA
+  const sa = d.research.sa;
+  $('saLabel').innerHTML = `${sa.label} <small>score ${sa.score>0?'+':''}${sa.score} · 긍정어 ${sa.pos_hits} / 부정어 ${sa.neg_hits}</small>`;
+  $('saDot').style.left = `${(sa.score+1)/2*100}%`;
+  // EC
+  $('ecTags').replaceChildren(...(d.research.ec.events.length
+    ? d.research.ec.events.map(ev=>chipEl(ev.event,'rate')) : [chipEl('일반','date')]));
+  // TSF sparkline
+  drawSpark(d.research.tsf);
+  $('trendBadge').textContent = '추세: '+d.research.tsf.trend;
+  // MAC
+  const mac = d.mac;
+  const off = 339 - 339*mac.confidence;
+  $('ringFg').style.strokeDashoffset = off;
+  $('ringTxt').textContent = Math.round(mac.confidence*100)+'%';
+  $('verdict').textContent = mac.verdict;
+  const ml = $('macList'); ml.innerHTML='';
+  mac.reinforcements.forEach(r=>{ ml.innerHTML += `<div class="r">▲ ${r}</div>`; });
+  mac.conflicts.forEach(c=>{ ml.innerHTML += `<div class="c">▼ ${c}</div>`; });
+  // audit
+  const at = $('auditTable');
+  at.innerHTML = d.audit.map(a=>`<tr><td>${a.agent}</td><td>${(a.tasks||[]).join(' · ')||('신뢰도 '+a.confidence)}</td><td>${a.ms}ms</td></tr>`).join('');
+}
+
+function drawSpark(tsf){
+  const svg = $('spark');
+  const hist = tsf.history.map(h=>h.rate);
+  const fc = tsf.forecast;
+  const all = [...hist, ...fc];
+  const min = Math.min(...all)-0.2, max = Math.max(...all)+0.2;
+  const W=460, H=110, pad=8;
+  const n = all.length;
+  const x = i => pad + i*(W-2*pad)/(n-1);
+  const y = v => H-pad - (v-min)/(max-min)*(H-2*pad);
+  let histPts = hist.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+  let fcPts = [ `${x(hist.length-1)},${y(hist[hist.length-1])}`,
+                ...fc.map((v,i)=>`${x(hist.length+i)},${y(v)}`) ].join(' ');
+  svg.innerHTML = `
+    <polyline points="${histPts}" fill="none" stroke="#26231C" stroke-width="2.5" stroke-linecap="round"/>
+    <polyline points="${fcPts}" fill="none" stroke="#FFBC00" stroke-width="2.5" stroke-dasharray="6 5" stroke-linecap="round"/>
+    ${fc.map((v,i)=>`<circle cx="${x(hist.length+i)}" cy="${y(v)}" r="3.5" fill="#FFBC00"/>`).join('')}
+    <text x="${x(0)}" y="${y(hist[0])-8}" font-size="11" fill="#6B655A">${hist[0]}%</text>
+    <text x="${x(n-1)-30}" y="${y(fc[fc.length-1])-8}" font-size="11" fill="#B8860B" font-weight="700">${fc[fc.length-1]}%</text>`;
+}
+
+/* ── FD ── */
+async function runFraud(){
+  const body = {
+    deposit:+$('fd-deposit').value||0, price:+$('fd-price').value||0,
+    mortgage:+$('fd-mortgage').value||0,
+    trust_registered:$('fd-trust').checked, tax_arrears:$('fd-tax').checked,
+    landlord_multi:$('fd-multi').checked };
+  const r = await fetch('/api/fraud',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d = await r.json();
+  $('fdBox').classList.add('show');
+  const g = $('fdGauge'); g.className = 'gauge ' + (d.score>=60?'danger':(d.score>=30?'warn':''));
+  $('fdBar').style.width = d.score+'%';
+  const cls = d.grade==='위험'?'danger':(d.grade==='주의'?'warn':'safe');
+  $('fdGrade').className = 'grade '+cls;
+  $('fdGrade').textContent = `위험 점수 ${d.score}점 — ${d.grade}`;
+  $('fdReasons').innerHTML = d.reasons.map(x=>`<li>${x}</li>`).join('');
+  $('fdActions').innerHTML = '<b>권장 조치</b><br>' + d.actions.map(a=>'▶ '+a).join('<br>');
+}
+
+/* ── DRP ── */
+async function runDrp(){
+  const body = {
+    annual_income:+$('dr-income').value||0,
+    existing_annual_payment:+$('dr-existing').value||0,
+    new_loan:+$('dr-loan').value||0,
+    rate_pct:+$('dr-rate').value||4.0 };
+  const r = await fetch('/api/drp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d = await r.json();
+  if(d.error){ alert(d.error); return; }
+  $('drBox').classList.add('show');
+  const pct = Math.min(d.dsr_pct, 100);
+  const g = $('drGauge'); g.className = 'gauge ' + (d.dsr_pct>=40?'danger':(d.dsr_pct>=30?'warn':''));
+  $('drBar').style.width = pct+'%';
+  const cls = d.dsr_pct>=40?'danger':(d.dsr_pct>=30?'warn':'safe');
+  $('drGrade').className = 'grade '+cls;
+  $('drGrade').textContent = `DSR ${d.dsr_pct}% — ${d.grade}`;
+  $('drMsg').textContent = d.message;
+  $('drDetail').innerHTML = `<b>상세</b><br>신규 대출 월 상환액 약 ${d.new_monthly_payment}만원 (${d.assumption})<br>DSR 40% 내 추가 상환 여력: 연 ${d.max_additional_annual_payment}만원`;
+}
+</script>
+</body>
+</html>
