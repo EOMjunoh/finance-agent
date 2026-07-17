@@ -18,7 +18,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;
 .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px}
 
 /* ── 헤더 ── */
-header{display:flex;align-items:center;gap:14px;padding:28px 0 8px}
+header{display:flex;align-items:center;gap:14px;padding:28px 0 8px;flex-wrap:wrap}
 .logo{width:38px;height:38px;background:var(--yellow);border-radius:10px;display:flex;
   align-items:center;justify-content:center;font-weight:900;font-size:18px;color:var(--ink)}
 header h1{font-size:21px;font-weight:800;letter-spacing:-.3px}
@@ -26,6 +26,21 @@ header p{font-size:12.5px;color:var(--ink-soft)}
 .status{margin-left:auto;font-size:12px;font-weight:700;padding:6px 12px;border-radius:99px;
   background:var(--card);border:1px solid var(--line);color:var(--ink-soft)}
 .status.on{background:var(--teal-bg);color:var(--teal);border-color:transparent}
+.status.live{background:var(--tint);color:var(--yellow-deep);border-color:transparent}
+
+/* ── 스텝 인디케이터 ── */
+.stepper{display:flex;gap:6px;margin-top:18px;flex-wrap:wrap}
+.dot{font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:99px;
+  background:var(--card);border:1px solid var(--line);color:var(--ink-soft)}
+.dot.done{background:var(--teal-bg);color:var(--teal);border-color:transparent}
+.dot.cur{background:var(--yellow);color:var(--ink);border-color:transparent}
+
+/* ── 화면 전환 ── */
+.screen{display:none}
+.screen.active{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.nav-row{display:flex;justify-content:space-between;margin-top:20px;gap:10px}
+.nav-row .spacer{flex:1}
 
 /* ── 입력부 ── */
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
@@ -42,6 +57,7 @@ textarea:focus{outline:none;border-color:var(--yellow)}
 .btn:active{transform:scale(.97)}
 .btn:disabled{background:#E9E3D4;color:#A9A294;cursor:default}
 .btn.sm{padding:10px 18px;font-size:13px}
+.btn.ghost{background:var(--card);border:1.5px solid var(--line);color:var(--ink)}
 .agents{display:flex;gap:8px;flex-wrap:wrap}
 .chip{font-size:12px;font-weight:700;padding:7px 13px;border-radius:99px;
   background:var(--paper);border:1px solid var(--line);color:var(--ink-soft);
@@ -53,15 +69,35 @@ textarea:focus{outline:none;border-color:var(--yellow)}
 .chip.done i{background:var(--teal)}
 @keyframes blink{50%{opacity:.3}}
 
+/* ── 실시간 피드 ── */
+.feed-item{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1.5px solid var(--line);
+  border-radius:10px;margin-top:8px;cursor:pointer;transition:.15s;background:var(--paper)}
+.feed-item:hover{border-color:var(--yellow)}
+.feed-item.sel{border-color:var(--yellow-deep);background:var(--tint)}
+.feed-item .txt{font-size:12.5px;flex:1;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.feed-item .meta{font-size:10.5px;color:var(--ink-soft);white-space:nowrap;text-align:right}
+.feed-item .meta .new{display:inline-block;margin-top:4px;font-size:9.5px;font-weight:800;
+  color:var(--coral);background:var(--coral-bg);padding:2px 6px;border-radius:6px}
+.feed-list{max-height:260px;overflow-y:auto}
+.feed-empty{font-size:12.5px;color:var(--ink-soft);padding:10px 0}
+.push-row{display:flex;gap:8px;margin-top:12px}
+.push-row input{flex:1;padding:11px;border:1.5px solid var(--line);border-radius:9px;
+  font-family:inherit;font-size:13px;background:var(--paper)}
+.push-row input:focus{outline:none;border-color:var(--yellow)}
+
 /* ── 결과 그리드 ── */
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+.grid.single{grid-template-columns:1fr}
 @media(max-width:800px){.grid{grid-template-columns:1fr}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
-.card h3{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.card h3{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .tag{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:6px;
   background:var(--tint);color:var(--yellow-deep)}
 .tag.t{background:var(--teal-bg);color:var(--teal)}
 .tag.c{background:var(--coral-bg);color:var(--coral)}
+.tag.live{background:var(--teal-bg);color:var(--teal);margin-left:auto}
+.tag.fallback{background:var(--coral-bg);color:var(--coral);margin-left:auto}
 .summary{font-size:13.5px;background:var(--paper);border-radius:10px;padding:13px;line-height:1.7}
 .ent-group{margin-top:12px}
 .ent-group b{font-size:11.5px;color:var(--ink-soft);display:block;margin-bottom:5px}
@@ -83,11 +119,12 @@ textarea:focus{outline:none;border-color:var(--yellow)}
 
 /* 스파크라인 */
 .spark{width:100%;height:110px;margin-top:8px}
-.legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink-soft);margin-top:4px}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink-soft);margin-top:4px;flex-wrap:wrap}
 .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:4px}
+.live-note{font-size:11px;color:var(--ink-soft);margin-top:4px}
 
 /* MAC 카드 */
-.mac{grid-column:1/-1;display:grid;grid-template-columns:150px 1fr;gap:22px;align-items:center}
+.mac{display:grid;grid-template-columns:150px 1fr;gap:22px;align-items:center}
 @media(max-width:800px){.mac{grid-template-columns:1fr}}
 .ring-wrap{text-align:center}
 .ring{width:130px;height:130px}
@@ -102,7 +139,7 @@ textarea:focus{outline:none;border-color:var(--yellow)}
 .mac-list .c{color:var(--coral);padding:3px 0}
 
 /* 리스크 도구 */
-.tools{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
 @media(max-width:800px){.tools{grid-template-columns:1fr}}
 .field{margin-top:11px}
 .field label{font-size:12.5px;font-weight:700;display:block;margin-bottom:5px}
@@ -143,110 +180,186 @@ footer{margin-top:36px;font-size:11.5px;color:var(--ink-soft);text-align:center;
     <span class="status" id="apiStatus">API 확인 중…</span>
   </header>
 
-  <!-- 파이프라인 실행 -->
-  <div class="panel">
-    <h2>분석 파이프라인</h2>
-    <p class="hint">뉴스·공시 텍스트를 붙여넣거나, 비워두면 시연용 샘플 기사로 실행됩니다.</p>
-    <textarea id="newsInput" placeholder="예) 한국은행이 기준금리를 2.50%로 인하하면서…"></textarea>
-    <div class="run-row">
-      <button class="btn" id="runBtn" onclick="runPipeline()">파이프라인 실행</button>
-      <div class="agents">
-        <span class="chip" id="ch-da"><i></i>Data Analysis</span>
-        <span class="chip" id="ch-ir"><i></i>Investment Research</span>
-        <span class="chip" id="ch-rm"><i></i>Risk Management</span>
-        <span class="chip" id="ch-mac"><i></i>MAC Orchestrator</span>
-      </div>
-    </div>
-  </div>
+  <div class="stepper" id="stepper"></div>
 
-  <!-- 결과 그리드 -->
-  <div class="grid hide" id="resultGrid">
-    <div class="card">
-      <h3>뉴스 인사이트 <span class="tag">TS</span><span class="tag">NER</span><span class="tag">FRE</span></h3>
-      <div class="summary" id="tsSummary"></div>
-      <div class="ent-group"><b>기관 (ORG)</b><div class="ents" id="entOrg"></div></div>
-      <div class="ent-group"><b>수치 (RATE · MONEY)</b><div class="ents" id="entNum"></div></div>
-      <div class="ent-group"><b>추출된 관계 (FRE)</b><div id="freList"></div></div>
-    </div>
-
-    <div class="card">
-      <h3>시장 분석 <span class="tag t">SA</span><span class="tag t">EC</span><span class="tag t">TSF</span></h3>
-      <div class="big" id="saLabel"></div>
-      <div class="sa-bar"><div class="sa-dot" id="saDot" style="left:50%"></div></div>
-      <div class="sa-lab"><span>부정 −1</span><span>중립 0</span><span>긍정 +1</span></div>
-      <div class="ent-group"><b>이벤트 분류</b><div class="ents" id="ecTags"></div></div>
-      <div class="ent-group"><b>기준금리 12개월 + 3개월 예측</b>
-        <svg class="spark" id="spark" viewBox="0 0 460 110" preserveAspectRatio="none"></svg>
-        <div class="legend"><span><i style="background:var(--ink)"></i>실적</span>
-        <span><i style="background:var(--yellow)"></i>예측</span>
-        <span id="trendBadge" class="tag t"></span></div>
+  <!-- ══════════ STEP 0 — 메인 ══════════ -->
+  <section class="screen active" data-step="0">
+    <div class="panel">
+      <h2>분석 파이프라인</h2>
+      <p class="hint">뉴스·공시 텍스트를 붙여넣거나, 아래 실시간 피드에서 항목을 선택하세요. 비워두면 샘플 기사로 실행됩니다.</p>
+      <textarea id="newsInput" placeholder="예) 한국은행이 기준금리를 2.50%로 인하하면서…"></textarea>
+      <div class="run-row">
+        <button class="btn" id="runBtn" onclick="runPipeline()">파이프라인 실행</button>
+        <div class="agents">
+          <span class="chip" id="ch-da"><i></i>Data Analysis</span>
+          <span class="chip" id="ch-ir"><i></i>Investment Research</span>
+          <span class="chip" id="ch-rm"><i></i>Risk Management</span>
+          <span class="chip" id="ch-mac"><i></i>MAC Orchestrator</span>
+        </div>
       </div>
     </div>
 
-    <div class="card mac">
-      <div class="ring-wrap">
-        <svg class="ring" viewBox="0 0 130 130">
-          <circle class="bg" cx="65" cy="65" r="54"/>
-          <circle class="fg" id="ringFg" cx="65" cy="65" r="54" transform="rotate(-90 65 65)"/>
-          <text x="65" y="73" text-anchor="middle" id="ringTxt">–</text>
-        </svg>
-        <div style="font-size:12px;color:var(--ink-soft);font-weight:700">MAC 통합 신뢰도</div>
-      </div>
-      <div>
-        <h3>MAC 통합 판단 <span class="tag">Verbal Reinforcement</span></h3>
-        <div class="verdict" id="verdict"></div>
-        <div class="mac-list" id="macList"></div>
-        <table class="audit" id="auditTable"></table>
-      </div>
-    </div>
-  </div>
-
-  <!-- 리스크 도구 -->
-  <div class="tools">
-    <div class="card">
-      <h3>전세사기 위험 진단 <span class="tag c">FD</span></h3>
-      <div class="field"><label>전세 보증금 (만원)</label><input type="number" id="fd-deposit" value="18000"></div>
-      <div class="field"><label>주택 매매 시세 (만원)</label><input type="number" id="fd-price" value="20000"></div>
-      <div class="field"><label>선순위 근저당 (만원)</label><input type="number" id="fd-mortgage" value="0"></div>
-      <div class="checks">
-        <label><input type="checkbox" id="fd-trust"> 신탁 등기</label>
-        <label><input type="checkbox" id="fd-tax"> 임대인 체납</label>
-        <label><input type="checkbox" id="fd-multi"> 다주택 임대인</label>
-      </div>
-      <div class="run-row"><button class="btn sm" onclick="runFraud()">위험 진단</button></div>
-      <div class="result-box" id="fdBox">
-        <div class="gauge" id="fdGauge"><i id="fdBar"></i></div>
-        <div class="grade" id="fdGrade"></div>
-        <ul class="reasons" id="fdReasons"></ul>
-        <div class="actions-box" id="fdActions"></div>
+    <div class="panel">
+      <h2>실시간 뉴스 피드 <span class="tag t" id="feedLiveTag">폴링 중</span></h2>
+      <p class="hint">새로 추가되는 기사가 자동으로(15초 간격) 목록에 반영됩니다. 클릭하면 분석 입력으로 채워집니다.</p>
+      <div class="feed-list" id="feedList"><div class="feed-empty">불러오는 중…</div></div>
+      <div class="push-row">
+        <input id="feedInput" placeholder="속보 텍스트를 입력해 피드에 실시간으로 추가…">
+        <button class="btn sm" onclick="pushFeed()">추가</button>
       </div>
     </div>
 
-    <div class="card">
-      <h3>부채 리스크 (DSR) <span class="tag c">DRP</span></h3>
-      <div class="field"><label>연소득 (만원)</label><input type="number" id="dr-income" value="3200"></div>
-      <div class="field"><label>기존 대출 연 상환액 (만원)</label><input type="number" id="dr-existing" value="0"></div>
-      <div class="field"><label>신규 대출 원금 (만원)</label><input type="number" id="dr-loan" value="15000"></div>
-      <div class="field"><label>금리 (%)</label><input type="number" id="dr-rate" value="3.5" step="0.1"></div>
-      <div class="run-row"><button class="btn sm" onclick="runDrp()">DSR 계산</button></div>
-      <div class="result-box" id="drBox">
-        <div class="gauge" id="drGauge"><div class="mark" style="left:40%"></div><i id="drBar"></i></div>
-        <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">▲ 검정선 = 은행권 DSR 40% 규제선</div>
-        <div class="grade" id="drGrade"></div>
-        <div class="reasons" id="drMsg" style="margin-top:6px;font-size:13px"></div>
-        <div class="actions-box" id="drDetail"></div>
+    <div class="nav-row">
+      <span class="spacer"></span>
+      <button class="btn" id="toResultsBtn" disabled onclick="nextStep()">결과 보기 →</button>
+    </div>
+  </section>
+
+  <!-- ══════════ STEP 1 — 뉴스 인사이트 ══════════ -->
+  <section class="screen" data-step="1">
+    <div class="grid single">
+      <div class="card">
+        <h3>뉴스 인사이트 <span class="tag">TS</span><span class="tag">NER</span><span class="tag">FRE</span></h3>
+        <div class="summary" id="tsSummary"></div>
+        <div class="ent-group"><b>기관 (ORG)</b><div class="ents" id="entOrg"></div></div>
+        <div class="ent-group"><b>수치 (RATE · MONEY)</b><div class="ents" id="entNum"></div></div>
+        <div class="ent-group"><b>추출된 관계 (FRE)</b><div id="freList"></div></div>
       </div>
     </div>
-  </div>
+    <div class="nav-row">
+      <button class="btn ghost" onclick="prevStep()">← 이전</button>
+      <button class="btn" onclick="nextStep()">다음: 시장 분석 →</button>
+    </div>
+  </section>
+
+  <!-- ══════════ STEP 2 — 시장 분석 ══════════ -->
+  <section class="screen" data-step="2">
+    <div class="grid single">
+      <div class="card">
+        <h3>시장 분석 <span class="tag t">SA</span><span class="tag t">EC</span><span class="tag t">TSF</span></h3>
+        <div class="big" id="saLabel"></div>
+        <div class="sa-bar"><div class="sa-dot" id="saDot" style="left:50%"></div></div>
+        <div class="sa-lab"><span>부정 −1</span><span>중립 0</span><span>긍정 +1</span></div>
+        <div class="ent-group"><b>이벤트 분류</b><div class="ents" id="ecTags"></div></div>
+        <div class="ent-group"><b>기준금리 12개월 + 3개월 예측</b>
+          <svg class="spark" id="spark" viewBox="0 0 460 110" preserveAspectRatio="none"></svg>
+          <div class="legend"><span><i style="background:var(--ink)"></i>실적</span>
+          <span><i style="background:var(--yellow)"></i>예측</span>
+          <span id="trendBadge" class="tag t"></span>
+          <span id="rateSourceBadge" class="tag"></span></div>
+          <div class="live-note" id="rateUpdated"></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn ghost" onclick="prevStep()">← 이전</button>
+      <button class="btn" onclick="nextStep()">다음: MAC 통합 판단 →</button>
+    </div>
+  </section>
+
+  <!-- ══════════ STEP 3 — MAC 통합 판단 ══════════ -->
+  <section class="screen" data-step="3">
+    <div class="grid single">
+      <div class="card mac">
+        <div class="ring-wrap">
+          <svg class="ring" viewBox="0 0 130 130">
+            <circle class="bg" cx="65" cy="65" r="54"/>
+            <circle class="fg" id="ringFg" cx="65" cy="65" r="54" transform="rotate(-90 65 65)"/>
+            <text x="65" y="73" text-anchor="middle" id="ringTxt">–</text>
+          </svg>
+          <div style="font-size:12px;color:var(--ink-soft);font-weight:700">MAC 통합 신뢰도</div>
+        </div>
+        <div>
+          <h3>MAC 통합 판단 <span class="tag">Verbal Reinforcement</span></h3>
+          <div class="verdict" id="verdict"></div>
+          <div class="mac-list" id="macList"></div>
+          <table class="audit" id="auditTable"></table>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn ghost" onclick="prevStep()">← 이전</button>
+      <button class="btn" onclick="nextStep()">다음: 리스크 도구 →</button>
+    </div>
+  </section>
+
+  <!-- ══════════ STEP 4 — 리스크 도구 ══════════ -->
+  <section class="screen" data-step="4">
+    <div class="tools">
+      <div class="card">
+        <h3>전세사기 위험 진단 <span class="tag c">FD</span></h3>
+        <div class="field"><label>전세 보증금 (만원)</label><input type="number" id="fd-deposit" value="18000"></div>
+        <div class="field"><label>주택 매매 시세 (만원)</label><input type="number" id="fd-price" value="20000"></div>
+        <div class="field"><label>선순위 근저당 (만원)</label><input type="number" id="fd-mortgage" value="0"></div>
+        <div class="checks">
+          <label><input type="checkbox" id="fd-trust"> 신탁 등기</label>
+          <label><input type="checkbox" id="fd-tax"> 임대인 체납</label>
+          <label><input type="checkbox" id="fd-multi"> 다주택 임대인</label>
+        </div>
+        <div class="run-row"><button class="btn sm" onclick="runFraud()">위험 진단</button></div>
+        <div class="result-box" id="fdBox">
+          <div class="gauge" id="fdGauge"><i id="fdBar"></i></div>
+          <div class="grade" id="fdGrade"></div>
+          <ul class="reasons" id="fdReasons"></ul>
+          <div class="actions-box" id="fdActions"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>부채 리스크 (DSR) <span class="tag c">DRP</span></h3>
+        <div class="field"><label>연소득 (만원)</label><input type="number" id="dr-income" value="3200"></div>
+        <div class="field"><label>기존 대출 연 상환액 (만원)</label><input type="number" id="dr-existing" value="0"></div>
+        <div class="field"><label>신규 대출 원금 (만원)</label><input type="number" id="dr-loan" value="15000"></div>
+        <div class="field"><label>금리 (%)</label><input type="number" id="dr-rate" value="3.5" step="0.1"></div>
+        <div class="run-row"><button class="btn sm" onclick="runDrp()">DSR 계산</button></div>
+        <div class="result-box" id="drBox">
+          <div class="gauge" id="drGauge"><div class="mark" style="left:40%"></div><i id="drBar"></i></div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">▲ 검정선 = 은행권 DSR 40% 규제선</div>
+          <div class="grade" id="drGrade"></div>
+          <div class="reasons" id="drMsg" style="margin-top:6px;font-size:13px"></div>
+          <div class="actions-box" id="drDetail"></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn ghost" onclick="prevStep()">← 이전</button>
+      <button class="btn" onclick="goHome()">처음으로</button>
+    </div>
+  </section>
 
   <footer>
     본 서비스의 모든 판단·점수·예측은 데모용 규칙·통계 모델의 출력이며 투자·계약 의사결정의 근거가 될 수 없습니다.<br>
-    금리 데이터는 샘플이며 실서비스 전 최신 데이터로 교체가 필요합니다. · FinAgent MVP
+    기준금리는 한국은행 ECOS 공개 API 실시간 연동(실패 시 샘플 폴백)이며, 뉴스 피드는 시연용 입력을 실시간으로 반영합니다. · FinAgent MVP
   </footer>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
+
+/* ── 스텝 내비게이션 ── */
+const STEP_TITLES = ['시작','뉴스 인사이트','시장 분석','MAC 통합 판단','리스크 도구'];
+let step = 0;
+let hasResults = false;
+
+function screens(){ return [...document.querySelectorAll('.screen')]; }
+
+function showStep(i){
+  screens().forEach(s => s.classList.toggle('active', +s.dataset.step === i));
+  step = i;
+  renderStepper();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function nextStep(){ if(step < STEP_TITLES.length-1) showStep(step+1); }
+function prevStep(){ if(step > 0) showStep(step-1); }
+function goHome(){ showStep(0); }
+
+function renderStepper(){
+  $('stepper').innerHTML = STEP_TITLES.map((t,i)=>{
+    const cls = i===step ? 'cur' : (hasResults && i<=step ? 'done' : '');
+    return `<span class="dot ${cls}">${i+1}. ${t}</span>`;
+  }).join('');
+}
+renderStepper();
 
 /* ── 헬스체크 ── */
 (async()=>{
@@ -255,6 +368,57 @@ const $ = id => document.getElementById(id);
     if(j.ok){ $('apiStatus').textContent = '에이전트 4개 온라인'; $('apiStatus').classList.add('on'); }
   }catch(e){ $('apiStatus').textContent = 'API 미연결 — 서버 실행 필요'; }
 })();
+
+/* ── 실시간 뉴스 피드 (폴링) ── */
+let lastFeedId = 0;
+let selectedFeedId = null;
+
+function timeAgo(ts){
+  const s = Math.max(0, Math.floor(Date.now()/1000 - ts));
+  if(s < 60) return `${s}초 전`;
+  if(s < 3600) return `${Math.floor(s/60)}분 전`;
+  return `${Math.floor(s/3600)}시간 전`;
+}
+
+function renderFeedItem(it, isNew){
+  const el = document.createElement('div');
+  el.className = 'feed-item' + (selectedFeedId===it.id ? ' sel' : '');
+  el.dataset.id = it.id;
+  el.onclick = () => selectFeedItem(it);
+  el.innerHTML = `
+    <div class="txt">${it.text.replace(/</g,'&lt;')}</div>
+    <div class="meta">${it.source==='sample'?'샘플':'속보'} · ${timeAgo(it.ts)}${isNew?'<br><span class="new">NEW</span>':''}</div>`;
+  return el;
+}
+
+function selectFeedItem(it){
+  selectedFeedId = it.id;
+  $('newsInput').value = it.text;
+  document.querySelectorAll('.feed-item').forEach(e=> e.classList.toggle('sel', +e.dataset.id===it.id));
+}
+
+async function pollFeed(){
+  try{
+    const r = await fetch(`/api/news/feed?after_id=${lastFeedId}`);
+    const d = await r.json();
+    if(d.items.length){
+      const list = $('feedList');
+      if(lastFeedId === 0) list.innerHTML = '';
+      d.items.slice().reverse().forEach(it => list.prepend(renderFeedItem(it, lastFeedId>0)));
+      lastFeedId = d.latest_id;
+    }
+  }catch(e){ /* 서버 미연결 시 조용히 재시도 */ }
+}
+async function pushFeed(){
+  const val = $('feedInput').value.trim();
+  if(!val) return;
+  await fetch('/api/news/feed',{method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({text: val})});
+  $('feedInput').value = '';
+  await pollFeed();
+}
+pollFeed();
+setInterval(pollFeed, 15000);
 
 /* ── 파이프라인 ── */
 async function runPipeline(){
@@ -268,7 +432,13 @@ async function runPipeline(){
     const d = await res.json();
     ['ch-da','ch-ir','ch-rm'].forEach(id=>{ $(id).classList.remove('run'); $(id).classList.add('done'); });
     $('ch-mac').classList.add('run');
-    setTimeout(()=>{ $('ch-mac').classList.remove('run'); $('ch-mac').classList.add('done'); render(d); }, 500);
+    setTimeout(()=>{
+      $('ch-mac').classList.remove('run'); $('ch-mac').classList.add('done');
+      render(d);
+      hasResults = true;
+      $('toResultsBtn').disabled = false;
+      renderStepper();
+    }, 500);
   }catch(e){
     alert('파이프라인 호출 실패: '+e.message);
   }finally{
@@ -279,7 +449,6 @@ async function runPipeline(){
 function chipEl(txt, cls=''){ const s=document.createElement('span'); s.className='ent '+cls; s.textContent=txt; return s; }
 
 function render(d){
-  $('resultGrid').classList.remove('hide');
   // TS
   $('tsSummary').textContent = d.data_analysis.ts.summary;
   // NER
@@ -300,9 +469,13 @@ function render(d){
   // EC
   $('ecTags').replaceChildren(...(d.research.ec.events.length
     ? d.research.ec.events.map(ev=>chipEl(ev.event,'rate')) : [chipEl('일반','date')]));
-  // TSF sparkline
+  // TSF sparkline + 실시간 배지
   drawSpark(d.research.tsf);
   $('trendBadge').textContent = '추세: '+d.research.tsf.trend;
+  const live = d.research.tsf.source === 'ecos-live';
+  $('rateSourceBadge').textContent = live ? 'ECOS 실시간' : '샘플 폴백';
+  $('rateSourceBadge').className = 'tag ' + (live ? 'live' : 'fallback');
+  $('rateUpdated').textContent = d.research.tsf.last_updated ? `마지막 갱신: ${d.research.tsf.last_updated}` : '';
   // MAC
   const mac = d.mac;
   const off = 339 - 339*mac.confidence;

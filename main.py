@@ -1,5 +1,5 @@
 # main.py — FinAgent MVP 백엔드
-import pathlib
+import asyncio, pathlib
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from agents import mac, risk
+from agents import mac, risk, live_rate, news_feed
 
 load_dotenv()
 app = FastAPI(title="FinAgent — 금융 멀티에이전트 MVP")
@@ -18,8 +18,24 @@ BASE = pathlib.Path(__file__).parent
 SAMPLE_NEWS = (BASE / "data" / "sample_news.txt").read_text(encoding="utf-8")
 
 
+@app.on_event("startup")
+async def _startup():
+    await asyncio.to_thread(live_rate.refresh, True)   # 기동 시 1회 즉시 갱신
+
+    async def _loop():
+        while True:
+            await asyncio.sleep(live_rate.REFRESH_SEC)
+            await asyncio.to_thread(live_rate.refresh, True)
+
+    asyncio.create_task(_loop())
+
+
 class PipelineReq(BaseModel):
     text: str | None = None          # 없으면 샘플 뉴스 사용
+
+
+class NewsItemReq(BaseModel):
+    text: str
 
 
 class FraudReq(BaseModel):
@@ -59,6 +75,25 @@ async def fraud(req: FraudReq):
 @app.post("/api/drp")
 async def drp(req: DrpReq):
     return risk.default_risk(**req.model_dump())
+
+
+@app.get("/api/rate/live")
+async def rate_live():
+    return live_rate.status()
+
+
+@app.get("/api/news/feed")
+async def get_feed(after_id: int = 0):
+    items = news_feed.list_since(after_id)
+    return {"items": items, "latest_id": news_feed.latest_id()}
+
+
+@app.post("/api/news/feed")
+async def post_feed(req: NewsItemReq):
+    try:
+        return news_feed.add(req.text)
+    except ValueError:
+        return {"error": "빈 텍스트는 추가할 수 없습니다."}
 
 
 app.mount("/legacy", StaticFiles(directory="legacy"), name="legacy")

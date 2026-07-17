@@ -5,7 +5,8 @@ Investment Research Agent
 - EC  (Event Classification)    : 키워드 기반 이벤트 분류
 - TSF (Time Series Forecasting) : 선형회귀 + 이동평균으로 기준금리 3개월 예측
 """
-import os, re, csv, pathlib
+import os, re
+from . import live_rate
 
 POS_WORDS = ["상승","호조","개선","확대","완화","증가","반등","회복","인하","지원",
              "성장","안정","호재","급등","강세","활성화","혜택","우대"]
@@ -39,18 +40,9 @@ def ec(text: str) -> dict:
     return {"events": events, "primary": events[0]["event"] if events else "일반"}
 
 
-def _load_rates() -> list[tuple[str, float]]:
-    path = pathlib.Path(__file__).parent.parent / "data" / "base_rate.csv"
-    rows = []
-    with open(path, encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            rows.append((r["month"], float(r["rate"])))
-    return rows
-
-
 def tsf(horizon: int = 3) -> dict:
-    """기준금리 시계열 → 최근 12개월 선형회귀로 horizon개월 예측."""
-    series = _load_rates()
+    """기준금리 시계열(실시간 ECOS 연동, 실패 시 샘플 폴백) → 최근 12개월 선형회귀로 horizon개월 예측."""
+    series = live_rate.get_series()
     recent = series[-12:]
     n = len(recent)
     xs = list(range(n))
@@ -67,13 +59,16 @@ def tsf(horizon: int = 3) -> dict:
         forecast.append(round(max(0.0, min(raw, 10.0)) * 4) / 4)   # 0.25%p 스텝 반올림
 
     trend = "하락" if slope < -0.01 else ("상승" if slope > 0.01 else "보합")
+    live = live_rate.status()
     return {
         "history": [{"month": m, "rate": v} for m, v in series[-12:]],
         "forecast": forecast,
         "trend": trend,
         "slope_per_month": round(slope, 4),
         "method": "linear-regression(12m)",
-        "note": "샘플 데이터 기반 통계 예측 — 투자 판단 근거 아님",
+        "source": live["source"],            # "ecos-live" | "sample-fallback" | "init"
+        "last_updated": live["last_updated"],
+        "note": "한국은행 ECOS 실시간 연동(실패 시 샘플 폴백) 기반 통계 예측 — 투자 판단 근거 아님",
     }
 
 
