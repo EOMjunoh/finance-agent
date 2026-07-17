@@ -18,6 +18,12 @@ BASE = pathlib.Path(__file__).parent
 SAMPLE_NEWS = (BASE / "data" / "sample_news.txt").read_text(encoding="utf-8")
 
 
+def _sanitize(text: str) -> str:
+    """깨진 서로게이트 문자(예: 잘린 이모지, IME 조합 중 유실)가 섞여 들어오면
+    JSON 응답 인코딩(UnicodeEncodeError)이 실패하므로 안전하게 치환한다."""
+    return text.encode("utf-8", "replace").decode("utf-8")
+
+
 @app.on_event("startup")
 async def _startup():
     await asyncio.to_thread(live_rate.refresh, True)   # 기동 시 1회 즉시 갱신
@@ -63,7 +69,7 @@ async def health():
 
 @app.post("/api/pipeline")
 async def pipeline(req: PipelineReq):
-    text = (req.text or "").strip() or SAMPLE_NEWS
+    text = _sanitize((req.text or "").strip()) or SAMPLE_NEWS
     return await mac.run_pipeline(text)
 
 
@@ -91,7 +97,7 @@ async def get_feed(after_id: int = 0):
 @app.post("/api/news/feed")
 async def post_feed(req: NewsItemReq):
     try:
-        return news_feed.add(req.text)
+        return news_feed.add(_sanitize(req.text))
     except ValueError:
         return {"error": "빈 텍스트는 추가할 수 없습니다."}
 
@@ -102,4 +108,4 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 async def root():
-    return FileResponse("static/index.html")
+    return FileResponse("static/index.html", headers={"Cache-Control": "no-store"})

@@ -412,10 +412,16 @@ async function pollFeed(){
 async function pushFeed(){
   const val = $('feedInput').value.trim();
   if(!val) return;
-  await fetch('/api/news/feed',{method:'POST',headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({text: val})});
-  $('feedInput').value = '';
-  await pollFeed();
+  try{
+    const res = await fetch('/api/news/feed',{method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({text: val})});
+    const d = await res.json();
+    if(!res.ok || d.error) throw new Error(d.error || `서버 오류 (${res.status})`);
+    $('feedInput').value = '';
+    await pollFeed();
+  }catch(e){
+    alert('피드 추가 실패: '+e.message);
+  }
 }
 pollFeed();
 setInterval(pollFeed, 15000);
@@ -430,17 +436,18 @@ async function runPipeline(){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({text: $('newsInput').value || null})});
     const d = await res.json();
+    if(!res.ok) throw new Error(d.detail ? JSON.stringify(d.detail) : `서버 오류 (${res.status})`);
     ['ch-da','ch-ir','ch-rm'].forEach(id=>{ $(id).classList.remove('run'); $(id).classList.add('done'); });
     $('ch-mac').classList.add('run');
-    setTimeout(()=>{
-      $('ch-mac').classList.remove('run'); $('ch-mac').classList.add('done');
-      render(d);
-      hasResults = true;
-      $('toResultsBtn').disabled = false;
-      renderStepper();
-    }, 500);
+    await new Promise(r => setTimeout(r, 500));
+    $('ch-mac').classList.remove('run'); $('ch-mac').classList.add('done');
+    render(d);
+    hasResults = true;
+    $('toResultsBtn').disabled = false;
+    renderStepper();
   }catch(e){
     alert('파이프라인 호출 실패: '+e.message);
+    ['ch-da','ch-ir','ch-rm','ch-mac'].forEach(id=>{ $(id).classList.remove('run'); });
   }finally{
     btn.disabled = false; btn.textContent = '파이프라인 실행';
   }
